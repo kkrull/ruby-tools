@@ -87,6 +87,19 @@ describe RSpecGateway do
       end
     end
 
+    context 'given multiple contexts' do
+      let(:multiple_contexts) { make_io("context 'one' do",
+                                        "  it 'does something'",
+                                        "end",
+                                        "context 'two' do",
+                                        "  let(:data) { :available }",
+                                        "  it 'does something else'",
+                                        "end")}
+      it 'returns an entry for each context that has 1 or more tests' do
+        expect(context_sizes multiple_contexts).to eql [0, 1]
+      end
+    end
+
 #    context 'given a context with tests at multiple levels of nesting' do
 #      let(:io) { make_io("context 'parent' do",
 #                         "  let(:generic) { 42 }",

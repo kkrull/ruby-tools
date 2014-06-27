@@ -24,13 +24,22 @@ class RSpecGateway
     return context_sizes if io.eof?
     case io.readline
     when /^\s*its?\b/
-      context_sizes.push (io.lineno - start_of_context - 1) 
+      reached_tests(context_sizes.push (io.lineno - start_of_context - 1))
     when /^\s*$/
       inside_context context_sizes, start_of_context+1
     else
       inside_context context_sizes, start_of_context
     end
-    context_sizes
+  end
+
+  def reached_tests(context_sizes)
+    return context_sizes if io.eof?
+    case io.readline
+    when /^\s*context|^\s*describe/
+      inside_context context_sizes, io.lineno
+    when /^\s*its?\b/
+      reached_tests context_sizes
+    end
   end
 end
 
