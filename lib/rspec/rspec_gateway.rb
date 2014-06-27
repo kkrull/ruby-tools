@@ -8,12 +8,16 @@ class RSpecGateway
   end
 
   private
+  BLANK = /^\s*$/
+  CONTEXT = /^\s*context\b/
+  DESCRIBE = /^\s*describe\b/
+  TEST = /^\s*its?\b/
   attr_reader :io
 
   def looking_for_new_context(context_sizes)
     return done(context_sizes) if io.eof?
     case io.readline
-    when /^\s*context\b/, /^\s*describe\b/
+    when CONTEXT, DESCRIBE 
       @setup_loc = 0
       looking_for_first_test context_sizes
     else
@@ -24,9 +28,9 @@ class RSpecGateway
   def looking_for_first_test(context_sizes)
     return done(context_sizes) if io.eof?
     case io.readline
-    when /^\s*its?\b/
+    when TEST 
       looking_for_new_context(context_sizes.push(@setup_loc))
-    when /^\s*$/, /\s*context\b/, /\s*describe\b/
+    when BLANK, CONTEXT, DESCRIBE
       looking_for_first_test context_sizes
     else
       @setup_loc += 1

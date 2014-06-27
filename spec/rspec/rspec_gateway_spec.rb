@@ -6,7 +6,7 @@ describe RSpecGateway do
     shared_examples :context_sizes do |behavior, expected_sizes, source_lines|
       let(:io) { make_io source_lines }
       it "#{behavior}" do
-        puts "\n#{source_lines}"
+        #puts "\n#{source_lines}"
         expect(context_sizes io).to eql(expected_sizes)
       end
     end
