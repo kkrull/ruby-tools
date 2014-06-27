@@ -17,7 +17,7 @@ def run!(argv)
     exit_with_usage
   else
     require 'rspec/rspec_gateway'
-    RSpecGateway.new.context_sizes paths.first
+    do_context_loc paths.first
   end
 end
 
@@ -28,6 +28,13 @@ end
 def exit_with_message(message)
   $stderr.puts message
   exit 1
+end
+
+def do_context_loc(path)
+  File.open path do |file|
+    gateway = RSpecGateway.new file
+    gateway.context_sizes
+  end
 end
 
 setup_load_path

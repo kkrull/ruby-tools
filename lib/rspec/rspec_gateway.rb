@@ -1,22 +1,40 @@
 class RSpecGateway
-  def context_sizes(path)
+  def initialize(io)
+    @io = io
+  end
+
+  def context_sizes
+    outside_context []
+  end
+
+  private
+  attr_reader :io
+
+  def outside_context(context_sizes)
+    return context_sizes if io.eof?
+    case io.readline
+    when /^context/
+      inside_context context_sizes, io.lineno
+    else 
+      outside_context context_sizes
+    end
+  end
+
+  def inside_context(context_sizes, start_of_context)
+    return context_sizes if io.eof?
+    case io.readline
+    when /^\s*its?\b/
+      context_sizes.push (io.lineno - start_of_context - 1) 
+    when /^\s*$/
+      inside_context context_sizes, start_of_context+1
+    else
+      inside_context context_sizes, start_of_context
+    end
+    context_sizes
   end
 end
 
 
-
-#def process_path(path)
-#  puts "#{path}"
-#  File.open(path) do |file|
-#    context_sizes = read_context_sizes file
-#    context_sizes.each { |x| puts "- #{x.inspect}" }
-#  end
-#end
-#
-#def read_context_sizes(file)
-#  no_context file
-#end
-#
 #def no_context(file)
 #  return [] if file.eof?
 #  case file.readline
@@ -58,5 +76,3 @@ end
 #    end
 #  end
 #end
-#
-#ARGV.each { |path| process_path(path) }
