@@ -13,7 +13,7 @@ class RSpecGateway
   def outside_context(context_sizes)
     return context_sizes if io.eof?
     case io.readline
-    when /^context/
+    when /^\s*context|^\s*describe/
       inside_context context_sizes, io.lineno
     else 
       outside_context context_sizes

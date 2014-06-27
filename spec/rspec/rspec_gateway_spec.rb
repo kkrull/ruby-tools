@@ -32,43 +32,48 @@ describe RSpecGateway do
       end
     end
 
-    context 'given a context with 1 or more tests' do
-      context 'given no setup code' do
-        let(:empty_setup) { make_io("context 'no setup' do",
-                                    "  it { should be_empty }",
-                                    "end")}
-        let(:blank_setup) { make_io("context 'blank setup' do",
-                                    "",
-                                    "    ",
-                                    "\t\t",
-                                    "  it { should be_empty }",
-                                    "end")}
-        it 'returns 0' do
-          expect(context_sizes empty_setup).to eql [0]
-          expect(context_sizes blank_setup).to eql [0]
-        end
+    context 'given no setup code' do
+      let(:empty_setup) { make_io("context 'no setup' do",
+                                  "  it { should be_empty }",
+                                  "end")}
+      let(:blank_setup) { make_io("context 'blank setup' do",
+                                  "",
+                                  "    ",
+                                  "\t\t",
+                                  "  it { should be_empty }",
+                                  "end")}
+      it 'returns 0' do
+        expect(context_sizes empty_setup).to eql [0]
+        expect(context_sizes blank_setup).to eql [0]
       end
+    end
 
-      context 'given 1 or more lines of setup code before the first test' do
-        let(:io) { make_io("context 'setup' do",
-                           "  let(:one) { 'one' }",
-                           "  let(:two) { 'two' }",
-                           "", 
-                           "  it { should be_empty }",
-                           "  it { should eql('') }",
-                           "end")}
-        it 'returns the number of non-empty lines of setup code between the context and the first test' do
-          expect(context_sizes io).to eql [2]
-        end
+    context 'given a context or describe block with 1 or more tests' do
+      let(:context_block) { make_io("context 'here' do",
+                                    "  let(:useful) { 42 }",
+                                    "  it 'should do something'",
+                                    "end")}
+      let(:describe_block) { make_io("describe Something do",
+                                     "  let(:useful) { 42 }",
+                                     "  it 'should do something'",
+                                     "end")}
+      let(:indented_block) { make_io("  context 'here' do",
+                                     "    let(:useful) { 42 }",
+                                     "    it 'should do something'",
+                                     "  end")}
+      it 'returns the number of new setup lines between the context and the first test' do
+        expect(context_sizes context_block).to eql [1]
+        expect(context_sizes describe_block).to eql [1]
+        expect(context_sizes indented_block).to eql [1]
       end
+    end
 
-      context 'given a test with an its clause' do
-        let(:io) { make_io("context 'a context' do",
-                           "  its '#field has some value'",
-                           "end")}
-        it 'returns the number of lines of setup that occurred before this it clause' do
-          expect(context_sizes io).to eql [0]
-        end
+    context 'given a test with an its clause' do
+      let(:io) { make_io("context 'a context' do",
+                         "  its '#field has some value'",
+                         "end")}
+      it 'returns the number of lines of setup that occurred before this it clause' do
+        expect(context_sizes io).to eql [0]
       end
     end
 
