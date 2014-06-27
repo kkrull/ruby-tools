@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+def setup_load_path
+  bin_dir = File.expand_path File.dirname(__FILE__)
+  lib_dir = File.expand_path File.join(bin_dir, '..', 'lib')
+  $LOAD_PATH.unshift lib_dir
+end
+
+def run!(argv)
+  sub_command, *paths = argv 
+  case
+  when sub_command.nil?
+    exit_with_usage
+  when sub_command != 'context-loc'
+    exit_with_message "Invalid option: #{sub_command}"
+  when paths.empty?
+    exit_with_usage
+  else
+    require 'rspec/rspec_gateway'
+    RSpecGateway.new.context_sizes paths.first
+  end
+end
+
+def exit_with_usage
+  exit_with_message 'Usage: rspec-utils context-loc <xyz_spec.rb> ...'
+end
+
+def exit_with_message(message)
+  $stderr.puts message
+  exit 1
+end
+
+setup_load_path
+run! ARGV
