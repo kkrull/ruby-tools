@@ -34,7 +34,7 @@ def do_context_loc(path)
   File.open path do |file|
     gateway = RSpecGateway.new file
     context_sizes = gateway.context_sizes
-    context_sizes.each { |x| puts x }
+    context_sizes.each { |x| puts "#{x} #{path}" }
   end
 end
 

@@ -52,6 +52,6 @@ Feature: RSpec context size
     Then the exit status should be 0
     And the stdout should contain:
     """
-    2
+    2 one_test_spec.rb
     """
     And the stderr should not contain anything
