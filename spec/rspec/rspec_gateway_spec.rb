@@ -78,13 +78,34 @@ END
         )
       end
 
+      shared_examples :ignores_setup do |ignores_what, setup_lines|
+        include_examples(:context_sizes, "ignores #{ignores_what}", [0], <<END
+context 'bafflegab' do
+#{setup_lines}
+it { should behave }
+end
+END
+        )
+      end
+
       it_behaves_like :recognizes_context_named, 'context'
       it_behaves_like :recognizes_context_named, '  context'
       it_behaves_like :recognizes_context_named, 'describe'
       it_behaves_like :recognizes_context_named, '  describe'
+      it_behaves_like :ignores_setup, 'empty setup lines', ""
+      it_behaves_like :ignores_setup, 'empty setup lines', "context 'another context' do"
+      it_behaves_like :ignores_setup, 'empty setup lines', "describe 'another describe' do"
+
       it_behaves_like :context_sizes, 'recognizes RSpec3 its clauses', [0], <<END
 context 'RSpec3 its clause' do
   its(:field) { should be_awesome }
+end
+END
+
+      it_behaves_like :context_sizes, 'does not count setup for a second test in the same context', [0], <<END
+context 'multiple tests' do
+  its(:field) { should be_awesome }
+  its(:other_field) { should_not be_as_awesome }
 end
 END
     end
