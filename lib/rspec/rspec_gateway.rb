@@ -4,44 +4,70 @@ class RSpecGateway
   end
 
   def context_sizes
-    outside_context []
+    looking_for_new_context []
   end
 
   private
   attr_reader :io
 
-  def outside_context(context_sizes)
-    return context_sizes if io.eof?
+  def looking_for_new_context(context_sizes)
+    return done(context_sizes) if io.eof?
     case io.readline
-    when /^\s*context|^\s*describe/
-      inside_context context_sizes, io.lineno
-    else 
-      outside_context context_sizes
-    end
-  end
-
-  def inside_context(context_sizes, start_of_context)
-    return context_sizes if io.eof?
-    case io.readline
-    when /^\s*its?\b/
-      reached_tests(context_sizes.push (io.lineno - start_of_context - 1))
-    when /^\s*$/
-      inside_context context_sizes, start_of_context+1
+    when /^context/
+      @setup_loc = 0
+      looking_for_first_test context_sizes
     else
-      inside_context context_sizes, start_of_context
+      looking_for_new_context context_sizes
     end
   end
 
-  def reached_tests(context_sizes)
-    return context_sizes if io.eof?
+  def looking_for_first_test(context_sizes)
+    return done(context_sizes) if io.eof?
     case io.readline
-    when /^\s*context|^\s*describe/
-      inside_context context_sizes, io.lineno
-    when /^\s*its?\b/
-      reached_tests context_sizes
+    when /\bits?\b/
+      looking_for_new_context(context_sizes.push(@setup_loc))
+    else 
+      looking_for_first_test context_sizes
     end
+  end
+
+  def done(context_sizes)
+    context_sizes
   end
 end
+
+
+#def outside_context(context_sizes)
+#  return context_sizes if io.eof?
+#  case io.readline
+#  when /^\s*context|^\s*describe/
+#    inside_context context_sizes, io.lineno
+#  else 
+#    outside_context context_sizes
+#  end
+#end
+#
+#def inside_context(context_sizes, start_of_context)
+#  return context_sizes if io.eof?
+#  case io.readline
+#  when /^\s*its?\b/
+#    reached_tests(context_sizes.push (io.lineno - start_of_context - 1))
+#  when /^\s*$/
+#    inside_context context_sizes, start_of_context+1
+#  else
+#    inside_context context_sizes, start_of_context
+#  end
+#end
+#
+#def reached_tests(context_sizes)
+#  return context_sizes if io.eof?
+#  case io.readline
+#  when /^\s*context|^\s*describe/
+#    inside_context context_sizes, io.lineno
+#  when /^\s*its?\b/
+#    reached_tests context_sizes
+#  end
+#end
 
 
 #def no_context(file)
