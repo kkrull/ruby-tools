@@ -17,7 +17,7 @@ def run!(argv)
     exit_with_usage
   else
     require 'rspec/rspec_gateway'
-    do_context_loc paths.first
+    do_context_loc paths
   end
 end
 
@@ -30,12 +30,17 @@ def exit_with_message(message)
   exit 1
 end
 
-def do_context_loc(path)
-  File.open path do |file|
-    gateway = RSpecGateway.new file
-    context_sizes = gateway.context_sizes
-    context_sizes.each { |x| puts "#{x} #{path}" }
+def do_context_loc(paths)
+  grand_total = 0
+  paths.each do |path|
+    File.open path do |file|
+      gateway = RSpecGateway.new file
+      context_sizes = gateway.context_sizes
+      context_sizes.each { |x| puts "#{x} #{path}" }
+      grand_total += context_sizes.reduce(:+) || 0
+    end
   end
+  puts "#{grand_total} total" if paths.size > 1
 end
 
 setup_load_path
