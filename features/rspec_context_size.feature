@@ -1,6 +1,6 @@
-Feature: RSpec context size
+Feature: Test context size
   In order to make informed decisions about test code
-  As a programmer with a bunch of RSpec files
+  As a programmer with a bunch of Jasmine and RSpec files
   I want to know how many lines of code are spent in setting up tests
 
   Scenario: No arguments given
@@ -34,6 +34,33 @@ Feature: RSpec context size
     And the stdout should not contain anything
     And the stderr should not contain anything
 
+  Scenario: Jasmine file
+    Given a file named "OneTestSpec.js" with:
+    """
+    //= require production/Widget
+    describe('Widget', function(){
+      beforeEach(function(){
+        var templateHtml = '<script id="xyz_template" type="text/x-handlebars-template"/>';
+        setFixtures(templateHtml);
+      });
+      describe('instantiation', function(){
+        beforeEach(function(){
+          this.view = new WidgetView();
+        });
+        it('creates a div', function(){
+          expect(this.view.el.nodeName).toEqual('DIV');
+        });
+      });
+    });
+    """
+    When I run `rspec-utils context-loc OneTestSpec.js`
+    Then the exit status should be 0
+    And the stdout should contain:
+    """
+    7 OneTestSpec.js
+    """
+    And the stderr should not contain anything
+  
   Scenario: RSpec file
     Given a file named "one_test_spec.rb" with:
     """
